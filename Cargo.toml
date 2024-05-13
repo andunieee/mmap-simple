@@ -1,0 +1,16 @@
+[package]
+name = "mmap-simple"
+version = "0.1.0"
+edition = "2021"
+authors = ["andunië", "andunie@cassis.cash"]
+description = "Write, read, append and delete from an mmapped file with a very simple API."
+repository = "https://github.com/andunieee/mmap-simple"
+license = "MIT"
+keywords = ["mmap"]
+categories = ["os::unix-apis", "filesystem"]
+
+[dependencies]
+libc = "0.2.154"
+
+[dev-dependencies]
+serial_test = "3.1.1"
