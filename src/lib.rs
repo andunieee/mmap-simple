@@ -33,7 +33,7 @@ use crate::MmapError::*;
 pub struct Mmap {
     file: fs::File,
     ptr: *mut u8,
-    size: u64,
+    pub size: u64,
 }
 
 impl Mmap {
