@@ -100,10 +100,7 @@ impl Mmap {
     /// # Returns
     /// A `Result` containing the unit type (`()`) or an `io::Error` if the operation fails.
     pub fn append(&mut self, data: &[u8]) -> Result<(), io::Error> {
-        self.append_with(data.len(), |w| {
-            w.copy_from_slice(data);
-            Ok(data.len())
-        })
+        self.append_with(data.len(), |w| w.copy_from_slice(data))
     }
 
     /// Appends data to the end of the memory-mapped file using a custom writer function.
@@ -116,13 +113,13 @@ impl Mmap {
     /// A `Result` containing the unit type (`()`) or an `io::Error` if the operation fails.
     pub fn append_with<F>(&mut self, len: usize, writer: F) -> Result<(), io::Error>
     where
-        F: FnOnce(&mut [u8]) -> Result<usize, io::Error>,
+        F: FnOnce(&mut [u8]),
     {
         self.file.set_len(self.size + len as u64)?;
         let slice = unsafe {
             std::slice::from_raw_parts_mut(self.ptr.wrapping_offset(self.size as isize), len)
         };
-        writer(slice)?;
+        writer(slice);
         self.size += len as u64;
         self.file.sync_all()?;
         Ok(())
@@ -137,10 +134,7 @@ impl Mmap {
     /// # Returns
     /// A `Result` containing the unit type (`()`) or an `io::Error` if the operation fails.
     pub fn overwrite(&self, offset: usize, data: &[u8]) -> Result<(), io::Error> {
-        self.overwrite_with(offset, data.len(), |w| {
-            w.copy_from_slice(data);
-            Ok(data.len())
-        })
+        self.overwrite_with(offset, data.len(), |w| w.copy_from_slice(data))
     }
 
     /// Overwrites data in the memory-mapped file using a custom writer function.
@@ -154,7 +148,7 @@ impl Mmap {
     /// A `Result` containing the unit type (`()`) or an `io::Error` if the operation fails.
     pub fn overwrite_with<F>(&self, offset: usize, len: usize, writer: F) -> Result<(), io::Error>
     where
-        F: FnOnce(&mut [u8]) -> Result<usize, io::Error>,
+        F: FnOnce(&mut [u8]),
     {
         if offset + len > self.size as usize {
             return Err(io::Error::from(io::ErrorKind::UnexpectedEof));
@@ -163,7 +157,7 @@ impl Mmap {
         let slice = unsafe {
             std::slice::from_raw_parts_mut(self.ptr.wrapping_offset(offset as isize), len)
         };
-        writer(slice)?;
+        writer(slice);
         self.file.sync_all()?;
         Ok(())
     }
@@ -192,10 +186,7 @@ impl Mmap {
     /// A `Result` containing the number of bytes read or an `io::Error` if the operation fails.
     pub fn read(&self, offset: usize, len: usize) -> Result<Vec<u8>, io::Error> {
         let mut buf = vec![0u8; len];
-        self.read_with(offset, len, |b| {
-            buf.copy_from_slice(b);
-            Ok(len)
-        })?;
+        self.read_with(offset, len, |b| buf.copy_from_slice(b))?;
 
         Ok(buf)
     }
@@ -211,7 +202,7 @@ impl Mmap {
     /// A `Result` containing the number of bytes read or an `io::Error` if the operation fails.
     pub fn read_with<F>(&self, offset: usize, len: usize, reader: F) -> Result<(), io::Error>
     where
-        F: FnOnce(&[u8]) -> Result<usize, io::Error>,
+        F: FnOnce(&[u8]),
     {
         if offset + len > self.size as usize {
             return Err(io::Error::from(io::ErrorKind::UnexpectedEof));
@@ -220,7 +211,7 @@ impl Mmap {
         let slice = unsafe {
             std::slice::from_raw_parts_mut(self.ptr.wrapping_offset(offset as isize), len)
         };
-        reader(slice)?;
+        reader(slice);
         Ok(())
     }
 }

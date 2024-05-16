@@ -1,6 +1,6 @@
 [package]
 name = "mmap-simple"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["andunië", "andunie@cassis.cash"]
 description = "Write, read, append and delete from an mmapped file with a very simple API."
